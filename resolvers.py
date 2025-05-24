@@ -23,7 +23,11 @@ def resolve_character(_, info, id):
     conn = get_db_connection()
     try:
         character = conn.execute("SELECT id, name, species, home_planet_id, affiliation_id, rank_id FROM characters WHERE id = ?", (id,)).fetchone()
-        return dict(character) if character else None
+
+        if not character:
+            raise Exception(f"Karakter dengan ID {id} tidak ditemukan.")   
+        
+        return dict(character)
     finally:
         conn.close()
 
@@ -59,7 +63,11 @@ def resolve_starship(_, info, id):
     conn = get_db_connection()
     try:
         starship = conn.execute("SELECT id, name, model, manufacturer FROM starships WHERE id = ?", (id,)).fetchone()
-        return dict(starship) if starship else None
+
+        if not starship:
+            raise Exception(f"Starship dengan ID {id} tidak ditemukan.")
+        
+        return dict(starship)
     finally:
         conn.close()
 
@@ -349,7 +357,7 @@ def resolve_delete_character(_, info, id):
 def resolve_update_starship(_, info, input):
     conn = get_db_connection()
     try:
-        starship = conn.execute("SELECT id FROM starships WHERE id = ?", (input["id"],)).fetchone()
+        starship = conn.execute("SELECT * FROM starships WHERE id = ?", (input["id"],)).fetchone()
         if not starship:
             raise Exception(f"Kapal dengan ID {input['id']} tidak ditemukan.")
         conn.execute(
